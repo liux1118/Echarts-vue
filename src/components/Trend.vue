@@ -1,5 +1,18 @@
 <template>
   <div class="com-container">
+    <div class="title">
+      <span>▎{{showTitle}}</span>
+      <span class="iconfont title-icon"
+        @click="showChoice = !showChoice">&#xe6eb;</span>
+      <div class="select-con" v-show="showChoice">
+        <div class="select-item"
+          v-for="item in selectType"
+          :key="item.key"
+          @click="handleSelect(item.key)">
+          {{item.text}}
+        </div>
+      </div>
+    </div>
     <div class="com-chart" ref="trend_ref"></div>
   </div>
 </template>
@@ -11,6 +24,8 @@
       return {
         chartInstane: null,
         allData: null, //从服务器中获取所有数据
+        showChoice: false, //是否隐藏可选标题
+        choiceType: 'map',//显示的数据类型
       }
     },
     mounted() {
@@ -21,6 +36,22 @@
     },
     destroyed() {
       window.removeEventListener('resize', this.screenAdapter)
+    },
+    computed: {
+      selectType() {
+        if (!this.allData) {
+          return []
+        } else {
+          return this.allData.type.filter(item => item.key !== this.choiceType)
+        }
+      },
+      showTitle() {
+        if (!this.allData) {
+          return ''
+        } else {
+          return this.allData[this.choiceType].title
+        }
+      }
     },
     methods: {
       initChart() {
@@ -44,7 +75,7 @@
             trigger: 'axis',
           },
           legend: { //图例
-            left: 30,
+            left: 20,
             top: '15%',
             icon: 'circle',
           }
@@ -71,24 +102,24 @@
           'rgba(254, 33, 30, 0.5)',
           'rgba(250, 105, 0, 0.5)'
         ]
-      // 全透明的颜色值
-      const colorArr2 = [
-        'rgba(11, 168, 44, 0)',
-        'rgba(44, 110, 255, 0)',
-        'rgba(22, 242, 217, 0)',
-        'rgba(254, 33, 30, 0)',
-        'rgba(250, 105, 0, 0)'
-      ]
+        // 全透明的颜色值
+        const colorArr2 = [
+          'rgba(11, 168, 44, 0)',
+          'rgba(44, 110, 255, 0)',
+          'rgba(22, 242, 217, 0)',
+          'rgba(254, 33, 30, 0)',
+          'rgba(250, 105, 0, 0)'
+        ]
         // x轴数据（类目轴）
         const timeArr = this.allData.common.month;
         // y轴数据 series下的数据
-        const valueArr = this.allData.map.data;
+        const valueArr = this.allData[this.choiceType].data;
         const seriesArr = valueArr.map((item,index) => {
           return {
             name: item.name,
             type: 'line',
             data: item.data,
-            stack: 'map', //设置堆叠图呈现
+            stack: this.choiceType, //设置堆叠图呈现
             areaStyle: { //设置填充
               color: new this.$echarts.graphic.LinearGradient(0, 0, 0, 1, [
                 {
@@ -125,11 +156,27 @@
         }
         this.chartInstane.setOption(adapterOption)
         this.chartInstane.resize()
+      },
+
+      handleSelect(currentType) {
+        this.choiceType = currentType
+        this.updataChart()
+        this.showChoice = false
       }
     },
   }
 </script>
 
 <style lang="less" scoped>
-
+  .title {
+    position: absolute;
+    left: 20px;
+    top: 20px;
+    z-index: 10;
+    color: #fff;
+  }
+  .title-icon {
+    margin-left: 10px;
+    cursor: pointer; //更改鼠标样式为小手
+  }
 </style>
