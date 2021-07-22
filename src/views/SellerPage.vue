@@ -5,7 +5,6 @@
 <template>
   <div class="com-page">
     <seller></seller>
-    sell
   </div>
 </template>
 
