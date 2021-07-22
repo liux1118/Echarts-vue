@@ -5,6 +5,7 @@
 <template>
   <div class="com-page">
     <seller></seller>
+    sell
   </div>
 </template>
 
@@ -14,7 +15,7 @@
   export default {
     name: 'SellerPage',
     components: {
-      Seller,
+        Seller,
     },
   }
 </script>
