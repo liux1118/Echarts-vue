@@ -1,10 +1,11 @@
 <template>
   <div class="com-container">
-    <div class="title">
-      <span>▎{{showTitle}}</span>
+    <div class="title" :style="comStyle">
+      <span>{{'▎ ' + showTitle}}</span>
       <span class="iconfont title-icon"
-        @click="showChoice = !showChoice">&#xe6eb;</span>
-      <div class="select-con" v-show="showChoice">
+        @click="showChoice = !showChoice"
+        :style="comStyle">&#xe6eb;</span>
+      <div class="select-con" v-show="showChoice" :style="marginStyle">
         <div class="select-item"
           v-for="item in selectType"
           :key="item.key"
@@ -26,6 +27,7 @@
         allData: null, //从服务器中获取所有数据
         showChoice: false, //是否隐藏可选标题
         choiceType: 'map',//显示的数据类型
+        titleFontSize: 0, //指明标题字体大小
       }
     },
     mounted() {
@@ -50,6 +52,17 @@
           return ''
         } else {
           return this.allData[this.choiceType].title
+        }
+      },
+      // 设置标题的样式
+      comStyle() {
+        return {
+          fontSize: this.titleFontSize + 'px'
+        }
+      },
+      marginStyle() {
+        return {
+          marginLeft: this.titleFontSize + 'px'
         }
       }
     },
@@ -151,8 +164,17 @@
       },
 
       screenAdapter() {
-        const adapterOption = {
+        this.titleFontSize = this.$refs.trend_ref.offsetWidth / 100 * 3.6
 
+        const adapterOption = {
+          legend: {
+            itemWidth: this.titleFontSize,
+            itemHeight: this.titleFontSize,
+            itemGap: this.titleFontSize,
+            textStyle: {
+              fontSize: this.titleFontSize / 2,
+            }
+          }
         }
         this.chartInstane.setOption(adapterOption)
         this.chartInstane.resize()
@@ -178,5 +200,8 @@
   .title-icon {
     margin-left: 10px;
     cursor: pointer; //更改鼠标样式为小手
+  }
+  .select-con {
+    background-color: #222733;
   }
 </style>
