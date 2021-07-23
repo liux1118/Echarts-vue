@@ -18,6 +18,10 @@
         mapData: {}, //所获取的省份的地图矢量数据
       }
     },
+    created() {
+      // 在组件创建完成之后 进行回调函数的注册
+      this.$socket.registerCallBack('trendData', this.getData)
+    },
     mounted() {
       this.initChart()
       this.getData()
@@ -26,6 +30,8 @@
     },
     destroyed() {
       window.removeEventListener('resize', this.screenAdapter)
+      // 在组件销毁的时候进行回调函数的取消
+      this.$socket.unRegisterCallBack('trendData')
     },
     methods: {
       async initChart() {

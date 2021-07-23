@@ -16,15 +16,27 @@
         timerId: null, //定时器标识
       }
     },
+    created() {
+      // 在组件创建完成之后 进行回调函数的注册
+      this.$socket.registerCallBack('rankData', this.getData)
+    },
     mounted() {
       this.initChart()
-      this.getData()
+      // this.getData()
+      this.$socket.send({
+        action: 'getData',
+        socketType: 'rankData',
+        chartName: 'rank',
+        value: ''
+      })
       window.addEventListener('resize', this.screenAdapter)
       this.screenAdapter()
     },
     destroyed() {
       window.removeEventListener('resize', this.screenAdapter)
       clearInterval(this.timerId)
+      // 在组件销毁的时候进行回调函数的取消
+      this.$socket.unRegisterCallBack('rankData')
     },
     methods: {
       initChart() {
@@ -62,24 +74,24 @@
         this.chartInstane.on('mouseout', () => this.startInterval())
       },
 
-      async getData() {
+      getData(ret) {
         // await this.$http.get()
         // 对allData进行赋值
-        const {data: ret} = await this.$http.get('rank')
+        // const {data: ret} = await this.$http.get('rank')
         this.allData = ret
         this.allData.sort((a, b) => b.value - a.value)
-        console.log(ret);
+        // console.log(ret);
 
         this.updataChart()
         this.startInterval()
       },
 
       updataChart() {
-        // const colorArr = [
-        //   ['#0ba82c', '#4ff778'],
-        //   ['#2e72bf', '#23e5e5'],
-        //   ['#5052ee', '#ab6ee5']
-        // ]
+        const colorArr = [
+          ['#0ba82c', '#4ff778'],
+          ['#2e72bf', '#23e5e5'],
+          ['#5052ee', '#ab6ee5']
+        ]
         // 处理数据
         // 所有省份所形成的数组
         const provinceArr = this.allData.map(item => item.name)
@@ -102,54 +114,24 @@
               itemStyle: {
                 color: arg => {
                   // console.log(arg);
-                  // let targetColorArr = null
+                  let targetColorArr = null
                   if (arg.value > 300) {
-                    // targetColorArr = colorArr[0]
-                    return new this.$echarts.graphic.LinearGradient(0, 0, 0, 1, [
-                      {
-                        offset: 0,
-                        color: '#0ba82c'
-                      },
-                      {
-                        offset: 1,
-                        color: '#4ff778'
-                      }
-                    ])
+                    targetColorArr = colorArr[0]
                   } else if (arg.value > 200) {
-                    // targetColorArr = colorArr[1]
-                    return new this.$echarts.graphic.LinearGradient(0, 0, 0, 1, [
-                      {
-                        offset: 0,
-                        color: '#2e72bf'
-                      },
-                      {
-                        offset: 1,
-                        color: '#23e5e5'
-                      }
-                    ])
+                    targetColorArr = colorArr[1]
                   } else {
-                    // targetColorArr = colorArr[3]
-                    return new this.$echarts.graphic.LinearGradient(0, 0, 0, 1, [
-                      {
-                        offset: 0,
-                        color: '#5052ee'
-                      },
-                      {
-                        offset: 1,
-                        color: '#ab6ee5'
-                      }
-                    ])
+                    targetColorArr = colorArr[2]
                   }
-                  // return new this.$echarts.graphic.LinearGradient(0, 0, 0, 1, [
-                  //   {
-                  //     offset: 0,
-                  //     color: targetColorArr[0]
-                  //   },
-                  //   {
-                  //     offset: 1,
-                  //     color: targetColorArr[1]
-                  //   }
-                  // ])
+                  return new this.$echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                    {
+                      offset: 0,
+                      color: targetColorArr[0]
+                    },
+                    {
+                      offset: 1,
+                      color: targetColorArr[1]
+                    }
+                  ])
                 }
               }
             }

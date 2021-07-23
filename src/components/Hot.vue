@@ -18,6 +18,10 @@
         titleFontSize: 0,
       }
     },
+    created() {
+      // 在组件创建完成之后 进行回调函数的注册
+      this.$socket.registerCallBack('hotData', this.getData)
+    },
     computed: {
       catName() {
         if (!this.allData) {
@@ -34,12 +38,20 @@
     },
     mounted() {
       this.initChart()
-      this.getData()
+      // this.getData()
+      this.$socket.send({
+        action: 'getData',
+        socketType: 'hotData',
+        chartName: 'hotproduct',
+        value: ''
+      })
       window.addEventListener('resize', this.screenAdapter)
       this.screenAdapter()
     },
     destroyed() {
       window.removeEventListener('resize', this.screenAdapter)
+      // 在组件销毁的时候进行回调函数的取消
+      this.$socket.unRegisterCallBack('hotData')
     },
     methods: {
       initChart() {
@@ -91,12 +103,12 @@
         this.chartInstane.setOption(initOption);
       },
 
-      async getData() {
+      getData(ret) {
         // await this.$http.get()
         // 对allData进行赋值
-        const {data: ret} = await this.$http.get('hotproduct')
+        // const {data: ret} = await this.$http.get('hotproduct')
         this.allData = ret
-        console.log(this.allData);
+        // console.log(this.allData);
 
         this.updataChart()
       },

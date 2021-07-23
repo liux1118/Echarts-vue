@@ -20,9 +20,19 @@
         timeId: null, //定时器的标识
       }
     },
+    created() {
+      // 在组件创建完成之后 进行回调函数的注册
+      this.$socket.registerCallBack('sellerData', this.getData)
+    },
     mounted() { // dom结构加载完成
       this.initChart(),
-      this.getData(),
+      // this.getData(),
+      this.$socket.send({
+        action: 'getData',
+        socketType: 'sellerData',
+        chartName: 'seller',
+        value: ''
+      })
       window.addEventListener('resize', this.screenAdapter),
       // 在页面加载完成后，主动进行屏幕适配
       this.screenAdapter()
@@ -32,6 +42,8 @@
       clearInterval(this.timeId),
       // 在组件销毁时，监听取消
       window.removeEventListener('resize', this.screenAdapter)
+      // 在组件销毁的时候进行回调函数的取消
+      this.$socket.unRegisterCallBack('sellerData')
     },
     methods: {
       // 初始化echartsInstance对象
@@ -106,10 +118,10 @@
         this.chartInstance.on('mouseout', () => this.startInterval())
       },
       // 获取服务器的数据
-      async getData() {
+      getData(ret) {
         // http://127.0.0.1:8888/api/seller
         // ajax请求
-        const {data: ret} = await this.$http.get('seller');
+        // const {data: ret} = await this.$http.get('seller');
         // console.log(ret);
         this.allData = ret;
         // 对数组进行排序 升序

@@ -30,14 +30,27 @@
         titleFontSize: 0, //指明标题字体大小
       }
     },
+    created() {
+      // 在组件创建完成之后 进行回调函数的注册
+      this.$socket.registerCallBack('trendData', this.getData)
+    },
     mounted() {
       this.initChart()
-      this.getData()
+      // this.getData()
+      // 发送数据给服务器，告诉服务器，我现在需要数据
+      this.$socket.send({
+        action: 'getData',
+        socketType: 'trendData',
+        chartName: 'trend',
+        value: ''
+      })
       window.addEventListener('resize', this.screenAdapter)
       this.screenAdapter()
     },
     destroyed() {
       window.removeEventListener('resize', this.screenAdapter)
+      // 在组件销毁的时候进行回调函数的取消
+      this.$socket.unRegisterCallBack('trendData')
     },
     computed: {
       selectType() {
@@ -95,12 +108,12 @@
         }
         this.chartInstane.setOption(initOption);
       },
-
-      async getData() {
+      // ret 就是服务端发送给客户端的图表的数据
+      getData(ret) {
         // await this.$http.get()
         // 对allData进行赋值
-        const {data: ret} = await this.$http.get('trend')
-        console.log(ret);
+        // const {data: ret} = await this.$http.get('trend')
+        // console.log(ret);
         this.allData = ret
 
         this.updataChart()

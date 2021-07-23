@@ -4,6 +4,12 @@ import router from './router'
 import store from './store'
 import axios from 'axios'
 
+import SocketService from 'utils/socket_service'
+// 对服务端进行websocket的连接
+SocketService.Instance.connect()
+// 其他组件可以通过 this.$socket调用
+Vue.prototype.$socket = SocketService.Instance
+
 // 引入全局的样式文件
 import './assets/css/global.less'
 
