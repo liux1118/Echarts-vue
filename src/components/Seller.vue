@@ -3,12 +3,12 @@
   <div class="com-container">
     <!-- com-chart呈现图表容器 -->
     <div class="com-chart" ref="seller_ref">
-
     </div>
   </div>
 </template>
 
 <script>
+  import { mapState } from 'vuex'
   export default {
     name: 'Seller',
     data() {
@@ -17,7 +17,7 @@
         allData: null, //服务器返回的数据
         currentPage: 1, //当前显示的页数
         totalPage: 0, //一共有多少页
-        timeId: null, //定时器的标识
+        timerId: null, //定时器的标识
       }
     },
     created() {
@@ -39,7 +39,7 @@
     },
     destroyed() {
       // 销毁定时器
-      clearInterval(this.timeId),
+      clearInterval(this.timerId),
       // 在组件销毁时，监听取消
       window.removeEventListener('resize', this.screenAdapter)
       // 在组件销毁的时候进行回调函数的取消
@@ -49,7 +49,7 @@
       // 初始化echartsInstance对象
       initChart() {
         // 拿到 dom com-chart 元素
-        this.chartInstance = this.$echarts.init(this.$refs.seller_ref, 'chalk')
+        this.chartInstance = this.$echarts.init(this.$refs.seller_ref, this.theme)
         // 对图表初始化配置的控制
         const initOption = {
           title: {
@@ -114,7 +114,7 @@
         };
         this.chartInstance.setOption(initOption)
         // 对图表对象进行鼠标事件的监听
-        this.chartInstance.on('mouseover', () => clearInterval(this.timeId))
+        this.chartInstance.on('mouseover', () => clearInterval(this.timerId))
         this.chartInstance.on('mouseout', () => this.startInterval())
       },
       // 获取服务器的数据
@@ -157,10 +157,10 @@
       },
 
       startInterval() {
-        if (this.timeId) {
-          clearInterval(this.timeId)
+        if (this.timerId) {
+          clearInterval(this.timerId)
         }
-        this.timeId = setInterval(() => { //定时器 3s
+        this.timerId = setInterval(() => { //定时器 3s
           this.currentPage++;
           if (this.currentPage > this.totalPage) {
             this.currentPage = 1;
@@ -201,6 +201,28 @@
         this.chartInstance.resize()
       }
     },
+
+    computed: {
+      ...mapState(['theme'])
+    },
+    watch: {
+      theme () {
+        // console.log('主题切换了')
+        if (this.chartInstance) {
+          this.chartInstance.dispose() // 销毁当前的图表
+        }
+        this.initChart() // 重新以最新的主题名称初始化图表对象
+        this.screenAdapter() // 完成屏幕的适配
+        if (this.updateChart) {
+          this.updateChart() // 更新图表的展示
+        }
+        // this.chartInstance.dispose()
+        // this.initChart()
+        // this.updateChart()
+        // this.screenAdapter()
+        console.log('主题切换了')
+      }
+    }
   }
 </script>
 

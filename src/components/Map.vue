@@ -5,9 +5,9 @@
 </template>
 
 <script>
+  import { mapState } from 'vuex'
   import axios from 'axios'
-  import {getProvinceMapInfo} from '@/utils/map_utils'
-  // import {getProvinceMapInfo} from 'utils/map_utils'
+  import {getProvinceMapInfo} from 'utils/map_utils'
 
   export default {
     name: 'Map',
@@ -20,22 +20,28 @@
     },
     created() {
       // 在组件创建完成之后 进行回调函数的注册
-      this.$socket.registerCallBack('trendData', this.getData)
+      this.$socket.registerCallBack('mapData', this.getData)
     },
     mounted() {
       this.initChart()
-      this.getData()
+      // this.getData()
+      this.$socket.send({
+        action: 'getData',
+        socketType: 'mapData',
+        chartName: 'map',
+        value: ''
+      })
       window.addEventListener('resize', this.screenAdapter)
       this.screenAdapter()
     },
     destroyed() {
       window.removeEventListener('resize', this.screenAdapter)
       // 在组件销毁的时候进行回调函数的取消
-      this.$socket.unRegisterCallBack('trendData')
+      this.$socket.unRegisterCallBack('mapData')
     },
     methods: {
       async initChart() {
-        this.chartInstane = this.$echarts.init(this.$refs.map_ref, 'chalk')
+        this.chartInstane = this.$echarts.init(this.$refs.map_ref, this.theme)
         // 获取中国地图的矢量数据
         // http://127.0.0.1:8999/static/map/china.json
         // 由于现在获取的地图数据存在本地，不能使用$http
@@ -93,12 +99,12 @@
 
       },
 
-      async getData() {
+      getData(ret) {
         // await this.$http.get()
         // 对allData进行赋值
         // 调用updataChart方法更新图表
         // 从后台读取数据
-        const {data: ret} = await this.$http.get('map')
+        // const {data: ret} = await this.$http.get('map')
         this.allData = ret
         console.log(this.allData);
         this.updataChart()
@@ -141,7 +147,7 @@
             }
           },
           legend: { //设置图表自适应
-            itemWidth: titleFontSize,
+            itemWidth: titleFontSize / 2,
             itemHeight: titleFontSize / 2,
             itemGap: titleFontSize / 2, //间隔
             textStyle: {
@@ -162,6 +168,22 @@
         this.chartInstane.setOption(revertOption)
       }
     },
+
+    computed: {
+      ...mapState(['theme'])
+    },
+    watch: {
+      theme () {
+        // console.log('主题切换了')
+        if (this.chartInstance) {
+          this.chartInstance.dispose() // 销毁当前的图表
+          this.initChart() // 重新以最新的主题名称初始化图表对象
+          this.screenAdapter() // 完成屏幕的适配
+          this.updateChart() // 更新图表的展示
+          console.log('主题切换了')
+        }
+      }
+    }
   }
 </script>
 

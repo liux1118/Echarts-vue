@@ -1,13 +1,16 @@
 <template>
   <div class="com-container">
     <div class="com-chart" ref="hot_ref"></div>
-    <span class="iconfont arr-left" @click="toLeft" :style="conStyle">&#xe6ef;</span>
-    <span class="iconfont arr-right" @click="toRight" :style="conStyle">&#xe6ed;</span>
-    <span class="cat-name" :style="conStyle">{{catName}}</span>
+    <span class="iconfont arr-left" @click="toLeft" :style="comStyle">&#xe6ef;</span>
+    <span class="iconfont arr-right" @click="toRight" :style="comStyle">&#xe6ed;</span>
+    <span class="cat-name" :style="comStyle">{{catName}}</span>
   </div>
 </template>
 
 <script>
+  import { mapState } from 'vuex'
+  import { getThemeValue } from 'utils/theme_utils'
+
   export default {
     name: 'Hot',
     data() {
@@ -30,11 +33,13 @@
           return this.allData[this.currentIndex].name
         }
       },
-      conStyle() {
+      comStyle() {
         return {
-          fontSize: this.titleFontSize + 'px'
+          fontSize: this.titleFontSize + 'px',
+          color: getThemeValue(this.theme).titleColor
         }
-      }
+      },
+      ...mapState(['theme'])
     },
     mounted() {
       this.initChart()
@@ -55,7 +60,7 @@
     },
     methods: {
       initChart() {
-        this.chartInstane = this.$echarts.init(this.$refs.hot_ref, 'chalk')
+        this.chartInstane = this.$echarts.init(this.$refs.hot_ref, this.theme)
         const initOption = {
           title: {
             text: '▎ 热销商品销售金额占比统计',
@@ -145,8 +150,8 @@
             }
           },
           legend: {
-            itemWidth: this.titleFontSize / 2,
-            itemHeight: this.titleFontSize / 2,
+            itemWidth: this.titleFontSize,
+            itemHeight: this.titleFontSize,
             itemGap: this.titleFontSize / 2,
             textStyle: {
               fontSize: this.titleFontSize / 2,
@@ -178,6 +183,20 @@
         this.updataChart();
       }
     },
+
+    watch: {
+      theme () {
+        console.log('主题切换了')
+        if (this.chartInstance) {
+          this.chartInstance.dispose() // 销毁当前的图表
+        }
+        this.initChart() // 重新以最新的主题名称初始化图表对象
+        this.screenAdapter() // 完成屏幕的适配
+        if (this.updateChart) {
+          this.updateChart() // 更新图表的展示
+        }
+      }
+    }
   }
 </script>
 

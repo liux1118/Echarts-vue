@@ -5,6 +5,7 @@
 </template>
 
 <script>
+  import { mapState } from 'vuex'
   export default {
     name: 'Rank',
     data() {
@@ -40,7 +41,7 @@
     },
     methods: {
       initChart() {
-        this.chartInstane = this.$echarts.init(this.$refs.rank_ref, 'chalk')
+        this.chartInstane = this.$echarts.init(this.$refs.rank_ref, this.theme)
         const initOption = {
           title: {
             text: '▎ 地区销售排行',
@@ -176,6 +177,26 @@
         }, 2000)
       }
     },
+
+    computed: {
+      ...mapState(['theme'])
+    },
+    watch: {
+      theme () {
+        console.log('主题切换了')
+        if (this.chartInstance) {
+          this.chartInstance.dispose() // 销毁当前的图表
+          this.initChart() // 重新以最新的主题名称初始化图表对象
+          this.screenAdapter() // 完成屏幕的适配
+          this.updateChart() // 更新图表的展示
+        }
+        // this.initChart() // 重新以最新的主题名称初始化图表对象
+        // this.screenAdapter() // 完成屏幕的适配
+        // if (this.updateChart) {
+        //   this.updateChart() // 更新图表的展示
+        // }
+      }
+    }
   }
 </script>
 

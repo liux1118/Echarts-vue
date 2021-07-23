@@ -7,7 +7,7 @@
         :style="comStyle">&#xe6eb;</span>
       <div class="select-con" v-show="showChoice" :style="marginStyle">
         <div class="select-item"
-          v-for="item in selectType"
+          v-for="item in selectTypes"
           :key="item.key"
           @click="handleSelect(item.key)">
           {{item.text}}
@@ -19,6 +19,9 @@
 </template>
 
 <script>
+  import { mapState } from 'vuex'
+  import { getThemeValue } from 'utils/theme_utils'
+
   export default {
     name: 'Trend',
     data() {
@@ -53,7 +56,7 @@
       this.$socket.unRegisterCallBack('trendData')
     },
     computed: {
-      selectType() {
+      selectTypes() {
         if (!this.allData) {
           return []
         } else {
@@ -70,18 +73,20 @@
       // 设置标题的样式
       comStyle() {
         return {
-          fontSize: this.titleFontSize + 'px'
+          fontSize: this.titleFontSize + 'px',
+          color: getThemeValue(this.theme).titleColor
         }
       },
       marginStyle() {
         return {
           marginLeft: this.titleFontSize + 'px'
         }
-      }
+      },
+      ...mapState(['theme'])
     },
     methods: {
       initChart() {
-        this.chartInstane = this.$echarts.init(this.$refs.trend_ref, 'chalk')
+        this.chartInstane = this.$echarts.init(this.$refs.trend_ref, this.theme)
         const initOption = {
           xAxis: {
             type: 'category',
@@ -199,6 +204,21 @@
         this.showChoice = false
       }
     },
+
+    watch: {
+      theme() {
+        console.log('主题切换了')
+        if (this.chartInstance) {
+          this.chartInstance.dispose() // 销毁当前的图表
+        }
+        this.initChart() // 重新以最新的主题名称初始化图表对象
+        this.screenAdapter() // 完成屏幕的适配
+        if (this.updateChart) {
+          this.updateChart() // 更新图表的展示
+
+        }
+      }
+    }
   }
 </script>
 
