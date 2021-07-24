@@ -28,6 +28,11 @@ Vue.prototype.$http = axios
 // 别的组件中 this.$echarts
 Vue.prototype.$echarts = window.echarts
 
+// 引入dayjs
+import dayjs from 'dayjs'
+
+Vue.prototype.$dayjs = dayjs
+
 Vue.config.productionTip = false
 
 new Vue({

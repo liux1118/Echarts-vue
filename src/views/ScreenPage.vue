@@ -10,7 +10,7 @@
       <span class="title">电商平台实时监控系统</span>
       <div class="title-right">
         <img :src="themeSrc" class="qiehuan" @click="handleChangeTheme">
-        <!-- <span class="datetime">2049-01-01 00:00:00</span> -->
+        <span class="datetime">{{dateYear}} {{dateWeek}} {{dateDay}}</span>
       </div>
     </header>
     <div class="screen-body">
@@ -103,7 +103,27 @@
           rank: false,
           hot: false,
           stock: false
-        }
+        },
+        dateDay: null,
+        dateYear: null,
+        dateWeek: null,
+        weekday: ["周日", "周一", "周二", "周三", "周四", "周五", "周六"],
+        timer:null
+      }
+    },
+    mounted() {
+      this.timer =setInterval(() => {
+        const date=this.$dayjs(new Date())
+        this.dateDay = date.format('HH:mm:ss');
+        this.dateYear = date.format('YYYY-MM-DD');
+        this.dateWeek = date.format(this.weekday[date.day()]);
+
+      }, 1000)
+
+    },
+    beforeDestroy() {
+      if (this.timer) {
+        clearInterval(this.timer)
       }
     },
     methods: {
@@ -149,7 +169,8 @@
 
       recvThemeChange () {
         this.$store.commit('changeTheme')
-      }
+      },
+
     },
     components: {
       Hot,
